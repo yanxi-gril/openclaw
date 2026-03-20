@@ -1,0 +1,6 @@
+一、重新更换模型提供商或者API key
+情况一：更换 API Key，Base URL 不变
+例如，你从阿里云百炼的旧 API Key 切换为新 API Key，但依然使用 https://dashscope.aliyuncs.com/compatible-mode/v1 作为 Base URL，
+只需更新配置中的 apiKey 字段即可。
+情况二：更换模型提供商，Base URL 需要更新
+如果你从阿里云百炼切换到硅基流动（SiliconFlow），则需要同时更新 Base URL 为 https://api.siliconflow.cn/v1，并替换对应的 API Key。
