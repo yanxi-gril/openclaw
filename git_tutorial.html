@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git 使用详解</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .main-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 1600px;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .content-container {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            min-width: 0;
+        }
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px;
+        }
+        .intro {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+        .intro h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            font-size: 1.8em;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            margin-bottom: 20px;
+        }
+        .command-group {
+            background: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .command-group h3 {
+            background: #ecf0f1;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+        .command {
+            padding: 20px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .command:last-child {
+            border-bottom: none;
+        }
+        .command:hover {
+            background: #f8f9fa;
+        }
+        .cmd-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .cmd-code {
+            background: #2c3e50;
+            color: #2ecc71;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+        .cmd-short {
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .cmd-desc {
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .cmd-detail {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .cmd-detail h4 {
+            color: #2c3e50;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+        }
+        .example {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+        .example-title {
+            color: #4ec9b0;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            margin-left: 8px;
+        }
+        .badge-new { background: #27ae60; color: white; }
+        .badge-common { background: #3498db; color: white; }
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        /* 侧边导航样式 - 固定在左侧 */
+        .sidebar {
+            width: 280px;
+            height: calc(100vh - 40px);
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 20px;
+            flex-shrink: 0;
+        }
+        /* 自定义滚动条 */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+        }
+        .sidebar-header {
+            padding: 25px 20px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+        .sidebar-header h3 {
+            color: white;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-content {
+            padding: 15px 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .nav-section {
+            margin-bottom: 20px;
+        }
+        .nav-section-title {
+            padding: 12px 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #f1f3f4 0%, #e4e6e8 100%);
+            border-left: 4px solid #667eea;
+            margin: 12px 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-section-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
+        }
+        .nav-item {
+            padding: 10px 20px 10px 30px;
+            font-size: 0.85em;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: block;
+            text-decoration: none;
+            position: relative;
+            border-radius: 8px;
+            margin: 2px 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .nav-item:before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #bdc3c7;
+            transition: all 0.25s ease;
+        }
+        .nav-item:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+            padding-left: 35px;
+        }
+        .nav-item:hover:before {
+            background: #667eea;
+            transform: translateY(-50%) scale(1.3);
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
+        }
+        .nav-item.active {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+            font-weight: 500;
+        }
+        .nav-item.active:before {
+            background: white;
+            width: 8px;
+            height: 8px;
+        }
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 999;
+            font-size: 1.5em;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .back-to-top:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+        }
+        /* 响应式调整 */
+        @media (max-width: 1024px) {
+            body { padding: 10px; }
+            header, .content { padding: 20px; }
+            header h1 { font-size: 1.8em; }
+            .sidebar { 
+                width: 240px;
+                height: auto;
+                position: relative;
+                top: 0;
+                max-height: 300px;
+            }
+            .main-wrapper {
+                flex-direction: column;
+            }
+            .nav-toggle {
+                top: 10px;
+                left: 10px;
+                padding: 8px 12px;
+            }
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* 链接悬停效果 */
+        .command {
+            scroll-margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回顶部按钮 -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</button>
+    
+    <div class="main-wrapper">
+        <!-- 侧边导航栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>📑 命令导航</h3>
+            </div>
+            <nav class="nav-content" id="navContent">
+                <!-- 导航项将由 JavaScript 动态生成 -->
+            </nav>
+        </div>
+        
+        <div class="content-container">
+        <header>
+            <h1>📚 Git 使用详解</h1>
+            <p>版本控制系统的完整命令参考指南</p>
+        </header>
+
+        <div class="content">
+            <!-- 介绍 -->
+            <div class="intro">
+                <h2>🎯 什么是 Git？</h2>
+                <p>Git 是由 Linus Torvalds 于 2005 年创建的分布式版本控制系统。它用于追踪文件变化、协调多人协作开发，是当今最流行的版本控制工具。</p>
+                <br>
+                <p><strong>核心概念：</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>工作区</strong>：你实际编辑文件的目录</li>
+                    <li><strong>暂存区 (Stage)</strong>：准备提交的文件集合</li>
+                    <li><strong>仓库 (Repository)</strong>：保存所有历史版本的地方</li>
+                    <li><strong>分支 (Branch)</strong>：并行开发的独立线</li>
+                </ul>
+            </div>
+
+            <!-- 一、初始化与配置 -->
+            <div class="section">
+                <h2>一、初始化与配置</h2>
+                
+                <div class="command-group">
+                    <h3>🔧 基础配置命令</h3>
+                    
+                    <div class="command" id="cmd-git-init">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git init</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">初始化一个新的 Git 仓库</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>在当前目录创建一个隐藏的 .git 文件夹，用于存储所有版本控制信息。如果目录已是 Git 仓库，会提示 "Reinitialized existing Git repository"。</p>
+                            <div class="example">
+                                <div class="example-title">示例：初始化项目</div>
+                                $ mkdir my-project<br>
+                                $ cd my-project<br>
+                                $ git init<br>
+                                Initialized empty Git repository in /path/to/my-project/.git/
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-clone">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git clone &lt;url&gt;</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">克隆远程仓库到本地</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>从远程地址复制整个仓库（包括所有分支和历史记录）到本地。会自动创建同名文件夹。</p>
+                            <div class="example">
+                                <div class="example-title">示例：克隆仓库</div>
+                                $ git clone https://github.com/user/repo.git<br>
+                                $ git clone -b main --single-branch https://github.com/user/repo.git<br>
+                                # 只克隆 main 分支<br>
+                                $ git clone --depth 1 https://github.com/user/repo.git<br>
+                                # 浅克隆，只获取最新一次提交
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-config">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git config</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">配置 Git 设置</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>用于设置用户信息、别名等配置。分为三个级别：--global（全局）、--local（当前仓库）、--system（系统级）。</p>
+                            <div class="example">
+                                <div class="example-title">示例：配置用户信息</div>
+                                $ git config --global user.name "Your Name"<br>
+                                $ git config --global user.email "your@email.com"<br>
+                                $ git config --global core.editor "vim"<br>
+                                $ git config --global alias.co checkout<br>
+                                $ git config --list  # 查看所有配置
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 二、基本工作流 -->
+            <div class="section">
+                <h2>二、基本工作流</h2>
+                
+                <div class="command-group">
+                    <h3>📝 文件状态管理</h3>
+                    
+                    <div class="command" id="cmd-git-status">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git status</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">查看仓库当前状态</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>显示哪些文件被修改、哪些已添加到暂存区、哪些未跟踪。是开发过程中最常用的命令之一。</p>
+                            <div class="example">
+                                <div class="example-title">示例：查看状态</div>
+                                $ git status<br>
+                                # 输出示例：<br>
+                                # On branch main<br>
+                                # Changes not staged for commit:<br>
+                                #   (use \"git add <file>\" to update what will be committed)<br>
+                                #   (use \"git restore <file>\" to discard changes)<br>
+                                #   modified:   README.md<br>
+                                # Untracked files:<br>
+                                #   (use \"git add <file>\" to include in what will be committed)<br>
+                                #   new_file.py
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-add">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git add</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">将文件添加到暂存区</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>把工作区的修改放入暂存区，准备提交。可以添加单个文件、多个文件或整个目录。</p>
+                            <div class="example">
+                                <div class="example-title">示例：添加文件</div>
+                                $ git add README.md          # 添加单个文件<br>
+                                $ git add *.py              # 添加所有 .py 文件<br>
+                                $ git add src/              # 添加整个目录<br>
+                                $ git add .                 # 添加所有修改的文件<br>
+                                $ git add -A                # 添加所有文件（包括删除）<br>
+                                $ git add -p                # 交互式添加，可选择文件的部分修改
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-commit">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git commit</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">提交暂存区的修改</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>将暂存区的修改永久保存到仓库。每次提交都会生成唯一的 SHA-1 哈希值。</p>
+                            <div class="example">
+                                <div class="example-title">示例：提交修改</div>
+                                $ git commit -m "添加用户登录功能"<br>
+                                $ git commit -m "修复 bug" -m "详细描述在第二行"<br>
+                                $ git commit           # 打开编辑器写提交信息<br>
+                                $ git commit --amend   # 修改上一次提交<br>
+                                $ git commit --allow-empty -m "触发 CI"  # 空提交
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="command-group">
+                    <h3>🔄 撤销与恢复</h3>
+                    
+                    <div class="command" id="cmd-git-reset">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git reset</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">重置 HEAD 和暂存区到指定状态</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p><strong>--mixed</strong>（默认）：移动 HEAD，保留工作区修改<br>
+                            <strong>--soft</strong>：只移动 HEAD，保留暂存区和工作区<br>
+                            <strong>--hard</strong>：全部重置，丢失所有未提交修改</p>
+                            <div class="example">
+                                <div class="example-title">示例：重置操作</div>
+                                $ git reset HEAD~1        # 回退一次提交（保留修改）<br>
+                                $ git reset --soft HEAD~2 # 回退两次（保留暂存）<br>
+                                $ git reset --hard        # 彻底回退（危险！）<br>
+                                $ git reset filename      # 从暂存区移除文件
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-restore">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git restore</span>
+                            <span class="badge badge-new">新命令</span>
+                        </div>
+                        <p class="cmd-desc">恢复文件到指定状态（Git 2.23+）</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>新版 Git 推荐的撤销命令，比 checkout 更语义化。可用于恢复工作区或暂存区的文件。</p>
+                            <div class="example">
+                                <div class="example-title">示例：恢复文件</div>
+                                $ git restore filename           # 从暂存区恢复工作区<br>
+                                $ git restore --staged filename  # 从 HEAD 恢复暂存区<br>
+                                $ git restore --source=HEAD~1 filename  # 从历史版本恢复
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-checkout">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git checkout</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">切换分支或恢复文件</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>主要用于切换分支。也可用于从暂存区恢复工作区的文件（但推荐用 restore）。</p>
+                            <div class="example">
+                                <div class="example-title">示例：切换与恢复</div>
+                                $ git checkout feature          # 切换到 feature 分支<br>
+                                $ git checkout -b new-feature   # 创建并切换新分支<br>
+                                $ git checkout HEAD -- file     # 恢复文件到 HEAD 版本<br>
+                                $ git checkout -- file          # 丢弃工作区修改
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 三、分支操作 -->
+            <div class="section">
+                <h2>三、分支操作</h2>
+                
+                <div class="command-group">
+                    <h3>🌿 分支管理</h3>
+                    
+                    <div class="command" id="cmd-git-branch">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git branch</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">列出、创建或删除分支</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>不带参数时列出所有本地分支。配合参数可创建、删除、重命名分支。</p>
+                            <div class="example">
+                                <div class="example-title">示例：分支操作</div>
+                                $ git branch              # 列出所有分支<br>
+                                $ git branch -a           # 列出所有分支（含远程）<br>
+                                $ git branch feature      # 创建新分支<br>
+                                $ git branch -d feature   # 删除已合并分支<br>
+                                $ git branch -D feature   # 强制删除<br>
+                                $ git branch -m old new   # 重命名分支<br>
+                                $ git branch --contains HEAD  # 查看包含当前提交的分支
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-merge">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git merge</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">合并分支</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>将指定分支的改动合并到当前分支。Git 会尝试自动合并，冲突时需要手动解决。</p>
+                            <div class="example">
+                                <div class="example-title">示例：合并分支</div>
+                                $ git merge feature       # 合并 feature 分支<br>
+                                $ git merge --no-ff feature  # 禁用快进，保留合并记录<br>
+                                $ git merge --squash feature  # 压缩合并，单条提交<br>
+                                # 解决冲突后：<br>
+                                $ git add . && git commit  # 完成合并提交
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-rebase">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git rebase</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">变基（重写提交历史）</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>将当前分支的提交"移动"到另一个分支顶部，产生线性的历史。比 merge 更整洁，但会改变提交哈希。</p>
+                            <div class="example">
+                                <div class="example-title">示例：变基操作</div>
+                                $ git rebase main         # 将当前分支变基到 main<br>
+                                $ git rebase -i HEAD~3    # 交互式变基最近 3 次提交<br>
+                                # 交互模式下可：<br>
+                                # pick - 保留提交<br>
+                                # squash - 合并到前一个提交<br>
+                                # edit - 修改提交<br>
+                                # drop - 删除提交<br>
+                                $ git rebase --abort      # 中止变基<br>
+                                $ git rebase --continue   # 继续变基（解决冲突后）
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-cherry-pick">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git cherry-pick</span>
+                        </div>
+                        <p class="cmd-desc">挑选特定提交应用到当前分支</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>从任意分支提取一个或多个提交的改动，应用到当前分支。适合选择性合并。</p>
+                            <div class="example">
+                                <div class="example-title">示例：挑选提交</div>
+                                $ git cherry-pick abc1234      # 应用单个提交<br>
+                                $ git cherry-pick abc1234 def5678  # 应用多个提交<br>
+                                $ git cherry-pick abc1234^!    # 应用提交及其祖先<br>
+                                $ git cherry-pick --no-commit abc1234  # 不自动提交
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 四、远程操作 -->
+            <div class="section">
+                <h2>四、远程操作</h2>
+                
+                <div class="command-group">
+                    <h3>🌐 远程仓库管理</h3>
+                    
+                    <div class="command" id="cmd-git-remote">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git remote</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">管理远程仓库地址</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>用于查看、添加、删除远程仓库。克隆的仓库默认有名为 origin 的远程。</p>
+                            <div class="example">
+                                <div class="example-title">示例：远程管理</div>
+                                $ git remote -v              # 查看所有远程<br>
+                                $ git remote add origin https://github.com/user/repo.git  # 添加远程<br>
+                                $ git remote rename origin upstream  # 重命名<br>
+                                $ git remote remove origin   # 删除远程<br>
+                                $ git remote set-url origin https://new-url.com  # 修改地址
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-fetch">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git fetch</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">获取远程更新</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>从远程仓库下载新的分支、提交和文件，但不自动合并。是 merge 和 pull 的前置操作。</p>
+                            <div class="example">
+                                <div class="example-title">示例：获取更新</div>
+                                $ git fetch origin              # 获取 origin 所有更新<br>
+                                $ git fetch origin main         # 只获取 main 分支<br>
+                                $ git fetch --all               # 获取所有远程<br>
+                                $ git fetch origin --prune      # 获取并清理已删除分支
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-pull">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git pull</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">获取并合并远程更新</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>相当于 fetch + merge。获取远程更新并立即合并到当前分支。</p>
+                            <div class="example">
+                                <div class="example-title">示例：拉取更新</div>
+                                $ git pull                      # 拉取当前分支<br>
+                                $ git pull origin main          # 拉取 origin/main<br>
+                                $ git pull --rebase             # 用 rebase 方式拉取<br>
+                                $ git pull origin feature --no-commit  # 不自动提交
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-push">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git push</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">推送本地修改到远程</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>上传本地分支的提交到远程仓库。首次推送分支需要设置上游。</p>
+                            <div class="example">
+                                <div class="example-title">示例：推送修改</div>
+                                $ git push                      # 推送到上游<br>
+                                $ git push origin main          # 推送到 origin/main<br>
+                                $ git push -u origin feature    # 推送并设置上游<br>
+                                $ git push origin :feature      # 删除远程 feature 分支<br>
+                                $ git push --force              # 强制推送（危险！）<br>
+                                $ git push --force-with-lease   # 安全的强制推送
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 五、查看与对比 -->
+            <div class="section">
+                <h2>五、查看与对比</h2>
+                
+                <div class="command-group">
+                    <h3>🔍 日志与差异</h3>
+                    
+                    <div class="command" id="cmd-git-log">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git log</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">查看提交历史</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>显示提交历史记录。支持多种格式和过滤选项。</p>
+                            <div class="example">
+                                <div class="example-title">示例：查看日志</div>
+                                $ git log                       # 默认格式<br>
+                                $ git log --oneline             # 简洁单行格式<br>
+                                $ git log --graph               # 图形化分支<br>
+                                $ git log --graph --oneline --all  # 图形化所有分支<br>
+                                $ git log -p                    # 显示每次提交的改动<br>
+                                $ git log --stat                # 显示文件统计<br>
+                                $ git log --since="2 weeks ago"  # 时间过滤<br>
+                                $ git log author:"John"         # 作者过滤<br>
+                                $ git log --grep="fix"          # 搜索提交信息<br>
+                                $ git log src/                  # 只查看某个路径的历史
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-diff">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git diff</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">查看差异</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>显示不同状态之间的文件差异。是理解改动内容的重要工具。</p>
+                            <div class="example">
+                                <div class="example-title">示例：查看差异</div>
+                                $ git diff                        # 工作区 vs 暂存区<br>
+                                $ git diff --staged               # 暂存区 vs HEAD<br>
+                                $ git diff HEAD                   # 工作区 vs HEAD<br>
+                                $ git diff HEAD~1                 # 与上次提交对比<br>
+                                $ git diff main feature           # 分支间对比<br>
+                                $ git diff abc123 def456          # 两个提交对比<br>
+                                $ git diff --word-diff            # 按单词显示差异<br>
+                                $ git diff --color-words          # 彩色单词差异
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-show">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git show</span>
+                        </div>
+                        <p class="cmd-desc">显示提交详情</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>显示指定提交的详细信息，包括提交信息和文件改动。</p>
+                            <div class="example">
+                                <div class="example-title">示例：查看提交</div>
+                                $ git show                        # 显示当前 HEAD<br>
+                                $ git show abc123                 # 显示指定提交<br>
+                                $ git show HEAD~2                 # 显示上上次提交<br>
+                                $ git show HEAD:filename          # 显示文件在 HEAD 的内容<br>
+                                $ git show --stat                 # 显示统计信息
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-blame">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git blame</span>
+                        </div>
+                        <p class="cmd-desc">逐行显示文件修改者</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>显示文件中每一行最后修改的提交、作者和时间。用于追踪代码来源。</p>
+                            <div class="example">
+                                <div class="example-title">示例：代码溯源</div>
+                                $ git blame filename              # 查看文件溯源<br>
+                                $ git blame -L 10,20 filename     # 查看指定行范围<br>
+                                $ git blame --line-porcelain      # 机器可读格式<br>
+                                $ git blame --ignore-rev-heads    # 忽略合并提交
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 六、高级功能 -->
+            <div class="section">
+                <h2>六、高级功能</h2>
+                
+                <div class="command-group">
+                    <h3>🚀 高级操作</h3>
+                    
+                    <div class="command" id="cmd-git-stash">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git stash</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">暂存当前修改</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>将工作区的修改临时保存，便于切换分支。可随时恢复。</p>
+                            <div class="example">
+                                <div class="example-title">示例：暂存操作</div>
+                                $ git stash                     # 暂存修改<br>
+                                $ git stash save "描述信息"     # 带描述的暂存<br>
+                                $ git stash list                # 列出所有暂存<br>
+                                $ git stash pop                 # 恢复并删除最新暂存<br>
+                                $ git stash apply               # 恢复但保留暂存<br>
+                                $ git stash apply stash@{1}     # 恢复指定暂存<br>
+                                $ git stash drop                # 删除最新暂存<br>
+                                $ git stash clear               # 删除所有暂存
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-tag">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git tag</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">创建和管理标签</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>为特定提交添加标记，常用于版本发布。分为轻量标签和附注标签。</p>
+                            <div class="example">
+                                <div class="example-title">示例：标签操作</div>
+                                $ git tag v1.0.0                # 轻量标签<br>
+                                $ git tag -a v1.0.0 -m "版本说明"  # 附注标签<br>
+                                $ git tag                       # 列出所有标签<br>
+                                $ git tag -l "v1.*"             # 模糊匹配<br>
+                                $ git show v1.0.0               # 查看标签信息<br>
+                                $ git push origin --tags        # 推送所有标签<br>
+                                $ git push origin tag v1.0.0    # 推送单个标签<br>
+                                $ git tag -d v1.0.0             # 删除本地标签
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-reflog">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git reflog</span>
+                            <span class="badge badge-common">常用</span>
+                        </div>
+                        <p class="cmd-desc">查看 HEAD 操作历史</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>记录 HEAD 的所有移动操作，包括被 reset、rebase 等操作覆盖的提交。是恢复误操作的神器。</p>
+                            <div class="example">
+                                <div class="example-title">示例：查看操作日志</div>
+                                $ git reflog                    # 查看 HEAD 历史<br>
+                                $ git reflog show main          # 查看分支历史<br>
+                                $ git reflog expire --expire=now -- --branches  # 清理<br>
+                                # 误删除后恢复：<br>
+                                $ git reflog                    # 找到丢失的提交<br>
+                                $ git reset --hard HEAD@{1}     # 恢复到之前状态
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-bisect">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git bisect</span>
+                        </div>
+                        <p class="cmd-desc">二分查找引入 bug 的提交</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>通过二分查找快速定位引入问题的提交。需要能够判断某版本是否有问题。</p>
+                            <div class="example">
+                                <div class="example-title">示例：二分查找</div>
+                                $ git bisect start              # 开始二分<br>
+                                $ git bisect bad                # 标记当前为坏版本<br>
+                                $ git bisect good v1.0          # 标记已知好版本<br>
+                                # Git 会切换到中间版本，测试后：<br>
+                                $ git bisect good               # 如果没问题<br>
+                                $ git bisect bad                # 如果有问题<br>
+                                # 找到后：<br>
+                                $ git bisect reset              # 结束二分
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-submodule">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git submodule</span>
+                        </div>
+                        <p class="cmd-desc">管理子模块</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>将一个 Git 仓库作为另一个仓库的子目录。用于代码复用和依赖管理。</p>
+                            <div class="example">
+                                <div class="example-title">示例：子模块操作</div>
+                                $ git submodule add https://github.com/user/lib.git path/to/lib  # 添加<br>
+                                $ git submodule update --init   # 初始化子模块<br>
+                                $ git submodule update --recursive  # 递归更新<br>
+                                $ git submodule status          # 查看状态<br>
+                                $ git submodule foreach git pull  # 对所有子模块执行命令
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command" id="cmd-git-revert">
+                        <div class="cmd-title">
+                            <span class="cmd-code">git revert</span>
+                        </div>
+                        <p class="cmd-desc">反向应用提交（安全撤销）</p>
+                        <div class="cmd-detail">
+                            <h4>详细说明：</h4>
+                            <p>创建一个新的提交，其改动与指定提交相反。不会改变历史，适合已推送的提交。</p>
+                            <div class="example">
+                                <div class="example-title">示例：反向提交</div>
+                                $ git revert abc123             # 反向单个提交<br>
+                                $ git revert abc123^..abc123    # 等价于上面<br>
+                                $ git revert -n abc123          # 不自动提交<br>
+                                $ git revert HEAD~3..HEAD       # 反向多个提交<br>
+                                $ git revert --no-commit HEAD~3..HEAD  # 合并后一起提交
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 七、实用技巧 -->
+            <div class="section">
+                <h2>七、实用技巧</h2>
+                
+                <div class="command-group">
+                    <h3>💡 常用别名配置</h3>
+                    
+                    <div class="example">
+                        <div class="example-title">推荐添加到 ~/.gitconfig</div>
+                        [alias]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;st = status<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;co = checkout<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;br = branch<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;ci = commit<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;di = diff<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;unstage = reset HEAD<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;amend = commit --amend<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;last = log -1 HEAD<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;graph = log --graph --oneline --all<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;new = branch -a --contains HEAD
+                    </div>
+
+                    <h3 style="margin-top: 30px; margin-bottom: 15px;">📋 常用工作流</h3>
+                    
+                    <div class="example">
+                        <div class="example-title">功能开发工作流</div>
+                        # 1. 同步最新代码<br>
+                        git fetch origin && git checkout main && git pull<br>
+                        <br>
+                        # 2. 创建功能分支<br>
+                        git checkout -b feature/new-feature<br>
+                        <br>
+                        # 3. 开发并提交<br>
+                        git add . && git commit -m "feat: add new feature"<br>
+                        <br>
+                        # 4. 同步主分支（可选）<br>
+                        git fetch origin && git rebase origin/main<br>
+                        <br>
+                        # 5. 推送并创建 PR<br>
+                        git push -u origin feature/new-feature<br>
+                        <br>
+                        # 6. 合并后删除分支<br>
+                        git checkout main && git pull<br>
+                        git branch -d feature/new-feature
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>📖 Git 命令参考指南 | 持续更新中...</p>
+        </footer>
+    </div>
+    </div>
+    
+    <script>
+        // 导航数据
+        const navData = [
+            {
+                title: "一、初始化与配置",
+                commands: [
+                    { id: "cmd-git-init", name: "git init", desc: "初始化仓库" },
+                    { id: "cmd-git-clone", name: "git clone", desc: "克隆仓库" },
+                    { id: "cmd-git-config", name: "git config", desc: "配置设置" }
+                ]
+            },
+            {
+                title: "二、基本工作流",
+                commands: [
+                    { id: "cmd-git-status", name: "git status", desc: "查看状态" },
+                    { id: "cmd-git-add", name: "git add", desc: "添加文件" },
+                    { id: "cmd-git-commit", name: "git commit", desc: "提交修改" },
+                    { id: "cmd-git-reset", name: "git reset", desc: "重置操作" },
+                    { id: "cmd-git-restore", name: "git restore", desc: "恢复文件" },
+                    { id: "cmd-git-checkout", name: "git checkout", desc: "切换分支" }
+                ]
+            },
+            {
+                title: "三、分支操作",
+                commands: [
+                    { id: "cmd-git-branch", name: "git branch", desc: "分支管理" },
+                    { id: "cmd-git-merge", name: "git merge", desc: "合并分支" },
+                    { id: "cmd-git-rebase", name: "git rebase", desc: "变基操作" },
+                    { id: "cmd-git-cherry-pick", name: "git cherry-pick", desc: "挑选提交" }
+                ]
+            },
+            {
+                title: "四、远程操作",
+                commands: [
+                    { id: "cmd-git-remote", name: "git remote", desc: "远程管理" },
+                    { id: "cmd-git-fetch", name: "git fetch", desc: "获取更新" },
+                    { id: "cmd-git-pull", name: "git pull", desc: "拉取合并" },
+                    { id: "cmd-git-push", name: "git push", desc: "推送修改" }
+                ]
+            },
+            {
+                title: "五、查看与对比",
+                commands: [
+                    { id: "cmd-git-log", name: "git log", desc: "查看历史" },
+                    { id: "cmd-git-diff", name: "git diff", desc: "查看差异" },
+                    { id: "cmd-git-show", name: "git show", desc: "提交详情" },
+                    { id: "cmd-git-blame", name: "git blame", desc: "代码溯源" }
+                ]
+            },
+            {
+                title: "六、高级功能",
+                commands: [
+                    { id: "cmd-git-stash", name: "git stash", desc: "暂存修改" },
+                    { id: "cmd-git-tag", name: "git tag", desc: "标签管理" },
+                    { id: "cmd-git-reflog", name: "git reflog", desc: "操作历史" },
+                    { id: "cmd-git-bisect", name: "git bisect", desc: "二分查找" },
+                    { id: "cmd-git-submodule", name: "git submodule", desc: "子模块" },
+                    { id: "cmd-git-revert", name: "git revert", desc: "反向提交" }
+                ]
+            }
+        ];
+        
+        // 生成导航菜单
+        function generateNav() {
+            const navContent = document.getElementById('navContent');
+            let html = '';
+            
+            navData.forEach(section => {
+                html += '<div class="nav-section">';
+                html += `<div class="nav-section-title">${section.title}</div>`;
+                section.commands.forEach(cmd => {
+                    html += `<a href="#${cmd.id}" class="nav-item">${cmd.name}</a>`;
+                });
+                html += '</div>';
+            });
+            
+            navContent.innerHTML = html;
+        }
+        
+        // 返回顶部
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // 显示/隐藏返回顶部按钮
+        window.addEventListener('scroll', () => {
+            const backToTop = document.getElementById('backToTop');
+            if (window.pageYOffset > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+            
+            // 更新当前激活的导航项
+            updateActiveNav();
+        });
+        
+        // 更新当前激活的导航项
+        function updateActiveNav() {
+            const commands = document.querySelectorAll('.command');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            let currentId = '';
+            commands.forEach(cmd => {
+                const rect = cmd.getBoundingClientRect();
+                if (rect.top <= 150 && rect.bottom >= 150) {
+                    currentId = cmd.id;
+                }
+            });
+            
+            navItems.forEach(item => {
+                if (item.getAttribute('href') === '#' + currentId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            generateNav();
+        });
+    </script>
+</body>
+</html>
